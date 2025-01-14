@@ -1,5 +1,24 @@
 version: '3.9'
 services:
+  search-service:
+    container_name: search-service
+    restart: always
+    image: springboot/search-service
+    build: ./
+    mem_limit: 512M
+    ports:
+      - '8080:8080'
+  search-frontend:
+    container_name: search-frontend
+    image: react/search-frontend
+    build: ./front-end/autosuggest-search-bar
+    ports:
+      - '5173:5173'
+    depends_on:
+      - search-service 
+      - redis
+    restart: always
+    mem_limit: 512M
   redis:
     image: redis/redis-stack:latest
     restart: always

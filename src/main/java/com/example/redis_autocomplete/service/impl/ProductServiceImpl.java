@@ -51,13 +51,13 @@ public class ProductServiceImpl implements ProductService {
             return searchResult.stream()
                     .map(product -> {
                         if (product.getName().toLowerCase().contains(searchTerm.toLowerCase())) {
-                            return new AutoCompleteSuggestionResponse(product.getName(), MatchType.PRODUCT_MATCH.name(), product.getId());
+                            return new AutoCompleteSuggestionResponse(product.getName(), MatchType.PRODUCT_MATCH.name(), product.getId(), product.getBrandName(), product.getDescription());
                         } else if (product.getBrandName().toLowerCase().contains(searchTerm.toLowerCase())) {
-                            return new AutoCompleteSuggestionResponse(product.getName(), MatchType.BRAND_MATCH.name(), product.getId());
+                            return new AutoCompleteSuggestionResponse(product.getName(), MatchType.BRAND_MATCH.name(), product.getId(), product.getBrandName(), product.getDescription());
                         } else if (product.getDescription().toLowerCase().contains(searchTerm.toLowerCase())) {
-                            return new AutoCompleteSuggestionResponse(product.getName(), MatchType.DESCRIPTION_MATCH.name(), product.getId());
+                            return new AutoCompleteSuggestionResponse(product.getName(), MatchType.DESCRIPTION_MATCH.name(), product.getId(),product.getBrandName(), product.getDescription());
                         } else
-                            return new AutoCompleteSuggestionResponse(product.getName(), MatchType.SIMILAR_MATCH.name(), product.getId());
+                            return new AutoCompleteSuggestionResponse(product.getName(), MatchType.SIMILAR_MATCH.name(), product.getId(),product.getBrandName(), product.getDescription());
                     })
                     .collect(Collectors.groupingBy(AutoCompleteSuggestionResponse::type,
                             Collectors.toList()));

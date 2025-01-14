@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+.quattrocento-sans-regular {
+  font-family: "Quattrocento Sans", serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.quattrocento-sans-bold {
+  font-family: "Quattrocento Sans", serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
+.quattrocento-sans-regular-italic {
+  font-family: "Quattrocento Sans", serif;
+  font-weight: 400;
+  font-style: italic;
+}
+
+.quattrocento-sans-bold-italic {
+  font-family: "Quattrocento Sans", serif;
+  font-weight: 700;
+  font-style: italic;
+}
+
+:root {
+  font-family: "Quattrocento Sans", serif;
+  line-height: 1.5;
+  background-color: white;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
