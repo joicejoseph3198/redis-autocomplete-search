@@ -4,18 +4,25 @@ import { IoIosClose } from "react-icons/io";
 import { useDebounce } from "../hooks/useDebounce";
 import { TfiViewList } from "react-icons/tfi";
 import { BsArrowReturnLeft } from "react-icons/bs";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
+
 const SearchBar = () => {
     const [searchInput,setSearchInput] = useState("");
     const debouncedSearch = useDebounce(searchInput, 500);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const [result,setResult] = useState({});
-
-    console.log(result)
+    const [loading,setLoading] = useState(false);
 
     useEffect(()=>{
       if(debouncedSearch.trim()){
         const loadSearchResult = async () => {
+            setLoading(true);
             const response = await fetch(
-            `http://search-service:8080/autocomplete?searchTerm=${debouncedSearch}`
+            `http://localhost:8080/autocomplete?searchTerm=${debouncedSearch}`,{
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            }}
             );
         if (response.ok) {
             const data = await response.json();  // Parse the JSON response
@@ -24,6 +31,7 @@ const SearchBar = () => {
             console.error('Failed to fetch data');
           }
         }
+        setLoading(false);
         loadSearchResult();
       }else{
         setResult({});
@@ -47,7 +55,7 @@ const SearchBar = () => {
         switch (item.type) {
           case 'SIMILAR_MATCH':
             return (
-                <li className="flex flex-row items-center p-1 px-4 justify-between hover:bg-blue-500 hover:cursor-pointer hover:text-black rounded-md" key={item.id}>
+                <li className="flex flex-row items-center p-1 px-4 justify-between hover:bg-blue-500 hover:cursor-pointer hover:text-white rounded-md" key={item.id}>
                     <div className="flex flex-row items-center gap-2">
                         <TfiViewList />
                         <span>{item.suggestion}</span>
@@ -58,11 +66,11 @@ const SearchBar = () => {
             
           case 'BRAND_MATCH':
             return (
-                <li className="flex flex-row items-center p-1 px-4 justify-between hover:bg-blue-500 hover:cursor-pointer hover:text-black rounded-md" key={item.id}>
+                <li className="flex flex-row items-center p-1 px-4 justify-between hover:bg-blue-500 hover:cursor-pointer hover:text-white rounded-md" key={item.id}>
                 <div className="flex flex-row items-center gap-2">
                     <TfiViewList />
                     <div className="flex flex-col">
-                        <span className="text-slate-400">{underlineMatch(item.brandName, searchInput)}</span>
+                        <span className="text-slate-400 hover:text-white">{underlineMatch(item.brandName, searchInput)}</span>
                         <span>{item.suggestion}</span>
                     </div>
                 </div>
@@ -72,7 +80,7 @@ const SearchBar = () => {
             
           case 'PRODUCT_MATCH':
             return (
-                <li className="flex flex-row items-center p-1 px-4 justify-between hover:bg-blue-500 hover:cursor-pointer hover:text-black rounded-md" key={item.id}>
+                <li className="flex flex-row items-center p-1 px-4 justify-between hover:bg-blue-500 hover:cursor-pointer hover:text-white rounded-md" key={item.id}>
                     <div className="flex flex-row items-center gap-2">
                         <TfiViewList />
                         <span>{underlineMatch(item.suggestion, searchInput)}</span>
@@ -83,11 +91,11 @@ const SearchBar = () => {
 
             case 'DESCRIPTION_MATCH':
                 return (
-                    <li className="flex flex-row items-center p-1 px-4 justify-between hover:bg-blue-500 hover:cursor-pointer hover:text-black rounded-md" key={item.id}>
+                    <li className="flex flex-row items-center p-1 px-4 justify-between hover:bg-blue-500 hover:cursor-pointer hover:text-white rounded-md" key={item.id}>
                     <div className="flex flex-row items-center gap-2">
                         <TfiViewList />
                         <div className="flex flex-col">
-                            <span className="text-slate-400 text-sm">...{underlineMatch(item.description, searchInput)}...</span>
+                            <span className="text-slate-400 text-sm hover:text-white">...{underlineMatch(item.description, searchInput)}...</span>
                             <span>{item.suggestion}</span>
                         </div>
                     </div>
@@ -112,45 +120,67 @@ const SearchBar = () => {
     // }
     
     return(
-        <div className="relative flex flex-col mt-10 py-2 px-6 mx-5 rounded-md bg-gray-50 border flex w-full">
-            {/* SEARCH BAR*/}
-            <div className="absolute inset-0 flex mt-10 py-2 px-6 mx-5 rounded-full bg-gray-50 border flex h-[50px] w-fill">
-                <div className="flex flex-row items-center justify-center pr-2">
-                    <CiSearch />
+        <div>
+        {/* Search Bar as Placeholder */}
+        {(
+          <div
+            className="flex items-center mt-10 py-2 px-6 mx-5 rounded-full bg-gray-50 border cursor-pointer"
+            onClick={() => setIsModalOpen(true)}
+          >
+            <div className="flex items-center pr-2"  onClick={() => setIsModalOpen(true)}>
+             <CiSearch />
+            </div>
+            <input
+              type="text"
+              placeholder="Search"
+              className="bg-transparent w-full focus:outline-none text-sm border-0 text-slate-700 h-[30px]"
+              disabled // Disable input when modal is closed
+            />
+          </div>
+        )}
+  
+        {/* Modal */}
+        {isModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50" onClick={()=>setIsModalOpen(false)}>
+            <div className="bg-white rounded-md p-6 mt-10 w-2/3" onClick={(e)=> e.stopPropagation()}>
+              {/* Search Input */}
+              <div className="flex items-center mt-2 py-2 px-6 bg-gray-50 border rounded-md">
+                <div className="flex items-center pr-2">
+                {loading ? <AiOutlineLoading3Quarters/> : <CiSearch />}
                 </div>
                 <input
-                value={searchInput}
-                onChange={(e)=>setSearchInput(e.target.value)}
-                type="text" 
-                placeholder="Type to search" 
-                className="bg-transparent w-full focus:outline-none pr-4 text-sm border-0 text-slate-700" 
-            />
-                <div className="flex flex-row items-center justify-center px-2 "
-                >
-                    <IoIosClose />
-                </div>
-            </div>
-            {/* SEARCH BAR*/}
-            <div className="text-left text-slate-500 py-2 px-6 mt-[100px] max-h-[300px] overflow-y-scroll">
-            {Object.entries(result).length > 0 ? 
-            Object.entries(result).map(([key, items]) => (
-                <div key={key} className="result-section">
-                    <h2 className="text-black">{key.replace("_"," ")}</h2>
-                    <ul>
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  type="text"
+                  placeholder="Type to search"
+                  className="bg-transparent w-full focus:outline-none text-sm border-0 text-slate-700 h-[30px]"
+                />
+                <IoIosClose />
+              </div>
+  
+              {/* Search Results */}
+              <div className="text-left text-slate-500 py-2 mt-4 max-h-[300px] overflow-y-scroll">
+                {Object.entries(result).length > 0 ? (
+                  Object.entries(result).map(([key, items]) => (
+                    <div key={key} className="result-section">
+                      <h2 className="text-black">{key.replace("_", " ")}</h2>
+                      <ul>
                         {items.map((item) => (
-                            <div key={item.id}>
-                                {renderSearchResult(item, searchInput)}
-                            </div>
-                        
+                          <div key={item.id}>
+                            {renderSearchResult(item, searchInput)}
+                          </div>
                         ))}
-                    </ul>
-                </div>)):
-                <>
-                <p className="mt-12 text-center">No search result found.</p>
-                </>}
+                      </ul>
+                    </div>
+                  ))
+                ) : (
+                  <p className="mt-12 text-center">No search result found.</p>
+                )}
+              </div>
             </div>
-        </div>
-        
+          </div>
+        )}
+      </div>
     )
 }
 export default SearchBar;
